@@ -6,7 +6,6 @@ import {
   Lock, 
   Unlock, 
   Database, 
-  Sparkles, 
   Calendar, 
   Users, 
   ShieldAlert 
@@ -32,7 +31,7 @@ function App() {
       <aside className="sidebar">
         <div className="brand-section">
           <div className="brand-icon">
-            <Sparkles size={22} />
+            <FileText size={22} />
           </div>
           <span className="brand-name">CATAPP</span>
         </div>
@@ -150,9 +149,6 @@ function App() {
 
             <section className="workspace-panel" style={{ justifyContent: 'center' }}>
               <div className="coming-soon-container">
-                <div className="coming-soon-icon">
-                  <Sparkles />
-                </div>
                 <h2 className="coming-soon-title">Módulo en Desarrollo (Fase 2)</h2>
                 <p className="coming-soon-desc">
                   Este panel estará disponible una vez que compruebes y verifiques el funcionamiento completo del suite de herramientas PDF.

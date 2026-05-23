@@ -3,35 +3,35 @@
 :root {
   --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   
-  /* Palette HSL - Light Mode Premium (Pastel y Profesional) */
-  --bg-primary: 210 20% 98%;      /* Fondo general gris-azul muy suave */
+  /* Palette HSL - Light Mode Premium (Femenino, Delicado, Armonioso y Profesional) */
+  --bg-primary: 345 25% 98%;       /* Fondo general: un rosa-blanco muy pálido, cálido y sedoso */
   --bg-secondary: 0 0% 100%;       /* Blanco puro para tarjetas y barra lateral */
-  --bg-tertiary: 210 16% 95%;      /* Gris suave para contenedores secundarios */
-  --border-color: 210 14% 88%;     /* Borde sutil y fino */
-  --border-focus: 215 75% 55%;     /* Azul pizarra profesional para foco */
+  --bg-tertiary: 345 30% 95%;      /* Rosa pastel apagado muy suave para contenedores secundarios */
+  --border-color: 345 15% 90%;     /* Borde sutil y elegante con leve matiz rosa */
+  --border-focus: 345 50% 75%;     /* Azul/rosa pizarra profesional para foco */
   
-  --text-primary: 220 20% 15%;     /* Carbón oscuro para máxima lectura */
-  --text-secondary: 220 12% 45%;   /* Gris azulado medio */
-  --text-muted: 220 10% 65%;       /* Gris apagado */
+  --text-primary: 345 20% 18%;     /* Carbón profundo cálido (evita negro puro para mayor suavidad) */
+  --text-secondary: 345 10% 48%;   /* Gris rosáceo medio */
+  --text-muted: 345 8% 68%;        /* Gris rosáceo claro */
   
-  --color-primary: 215 65% 48%;    /* Azul corporativo serio */
-  --color-primary-glow: 215 65% 48% / 0.08;
-  --color-secondary: 185 50% 45%;  /* Turquesa pastel suave */
-  --color-accent: 340 55% 65%;     /* Rosa pastel suave para Cosmetología */
+  --color-primary: 345 55% 58%;    /* Rosa viejo de tono medio, elegante y femenino, serio y profesional */
+  --color-primary-glow: 345 55% 58% / 0.08;
+  --color-secondary: 325 40% 65%;  /* Orquídea pastel sutil */
+  --color-accent: 345 55% 58%;     /* Rosa CATAPP insignia */
   
-  --color-success: 145 60% 40%;    /* Verde pastel funcional */
-  --color-error: 355 70% 48%;      /* Rojo pastel funcional */
-  --color-warning: 40 75% 45%;     /* Naranja pastel funcional */
+  --color-success: 145 45% 45%;    /* Verde pastel sutil */
+  --color-error: 355 55% 52%;      /* Rojo/Coral pastel sutil */
+  --color-warning: 35 60% 48%;     /* Ocre/Dorado pastel sutil */
   
   /* Radios de borde geométricos y profesionales (más serios) */
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
   
-  /* Sombras limpias y sobrias estilo SaaS corporativo */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.02);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
-  --shadow-lg: 0 12px 24px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.03);
+  /* Sombras limpias y sobrias con matiz cálido estilo SaaS corporativo */
+  --shadow-sm: 0 1px 2px rgba(220,180,190,0.1), 0 1px 1px rgba(0,0,0,0.01);
+  --shadow-md: 0 4px 12px rgba(220,180,190,0.12), 0 1px 3px rgba(0,0,0,0.01);
+  --shadow-lg: 0 12px 24px rgba(220,180,190,0.15), 0 2px 6px rgba(0,0,0,0.02);
   --shadow-glow: none; /* Sin efectos tipo neón/IA */
   
   --transition-fast: 0.1s ease;
@@ -372,14 +372,14 @@ body {
 
 .dropzone:hover, .dropzone.drag-active {
   border-color: hsl(var(--color-primary));
-  background: rgba(37, 99, 235, 0.02);
+  background: rgba(220, 80, 110, 0.02);
 }
 
 .dropzone-icon {
   width: 48px;
   height: 48px;
   border-radius: var(--radius-md);
-  background: rgba(37, 99, 235, 0.08);
+  background: rgba(220, 80, 110, 0.08);
   color: hsl(var(--color-primary));
   display: flex;
   align-items: center;
@@ -520,7 +520,7 @@ body {
 }
 
 .btn-primary:hover {
-  background: hsl(215 75% 42%);
+  background: hsl(345 55% 50%);
   transform: none; /* Sin desplazamientos en hover */
   box-shadow: var(--shadow-sm);
 }
@@ -589,7 +589,7 @@ body {
 .form-input:focus {
   outline: none;
   border-color: hsl(var(--border-focus));
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 0 0 2px rgba(220, 80, 110, 0.08);
 }
 
 .form-row {
