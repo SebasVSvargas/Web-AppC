@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
-import { Upload, FileText, ArrowUp, ArrowDown, Trash2, Merge, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 
 interface FileWithId {
   id: string;
@@ -106,26 +106,17 @@ export const MergePDF: React.FC = () => {
     setSuccess(false);
 
     try {
-      // Creamos un nuevo documento PDF
       const mergedPdf = await PDFDocument.create();
       
       for (const fileObj of files) {
         const arrayBuffer = await fileObj.file.arrayBuffer();
-        
-        // Cargar cada PDF
         const pdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-        
-        // Copiar las páginas del PDF origen
         const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-        
-        // Insertar las páginas copiadas
         copiedPages.forEach((page) => mergedPdf.addPage(page));
       }
 
-      // Guardar el PDF fusionado
       const mergedPdfBytes = await mergedPdf.save();
 
-      // Crear un blob y descargar
       const blob = new Blob([mergedPdfBytes as any], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -148,23 +139,21 @@ export const MergePDF: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.5rem', color: 'white' }}>Unir Archivos PDF</h2>
-        <p style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.95rem' }}>
-          Arrastra y suelta tus archivos PDF en el área de abajo para unirlos en un solo documento. Puedes cambiar el orden en el que se fusionarán utilizando los botones de control.
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.35rem', color: 'hsl(var(--text-primary))' }}>Unir Archivos PDF</h2>
+        <p style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.9rem' }}>
+          Combina múltiples archivos PDF en un solo documento. Puedes cambiar el orden utilizando los botones de control antes de fusionar.
         </p>
       </div>
 
       {error && (
         <div className="alert error">
-          <AlertTriangle className="alert-icon" size={20} />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
         <div className="alert success">
-          <CheckCircle className="alert-icon" size={20} />
-          <span>¡PDFs fusionados exitosamente! La descarga debería haber comenzado automáticamente.</span>
+          <span>¡PDFs fusionados exitosamente! La descarga ha comenzado automáticamente.</span>
         </div>
       )}
 
@@ -184,28 +173,28 @@ export const MergePDF: React.FC = () => {
           accept=".pdf"
           onChange={handleFileInput}
         />
-        <div className="dropzone-icon">
-          <Upload size={32} />
-        </div>
         <div className="dropzone-text">
-          <h3>Arrastra y suelta tus PDFs aquí</h3>
-          <p>o haz clic para buscar en tu dispositivo</p>
+          <h3>Arrastra y suelta tus archivos PDF aquí</h3>
+          <p style={{ margin: '0.25rem 0 0.85rem' }}>o selecciona archivos desde tu dispositivo</p>
+          <span className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', pointerEvents: 'none' }}>
+            Seleccionar Archivos
+          </span>
         </div>
       </div>
 
       {files.length > 0 && (
         <div>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', color: 'white' }}>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.85rem', color: 'hsl(var(--text-primary))' }}>
             Archivos seleccionados ({files.length})
           </h3>
           
           <div className="file-list">
             {files.map((item, index) => (
               <div className="file-item" key={item.id}>
-                <div className="file-item-icon">
-                  <FileText size={24} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'hsl(var(--bg-tertiary))', color: 'hsl(var(--text-secondary))', fontSize: '0.75rem', fontWeight: 600 }}>
+                  {index + 1}
                 </div>
-                <div className="file-item-info">
+                <div className="file-item-info" style={{ marginLeft: '0.25rem' }}>
                   <div className="file-item-name">{item.file.name}</div>
                   <div className="file-item-size">{item.size}</div>
                 </div>
@@ -216,7 +205,7 @@ export const MergePDF: React.FC = () => {
                     disabled={index === 0} 
                     onClick={() => moveFile(index, 'up')}
                   >
-                    <ArrowUp size={16} />
+                    <ArrowUp size={14} />
                   </button>
                   <button 
                     className="action-btn" 
@@ -224,21 +213,21 @@ export const MergePDF: React.FC = () => {
                     disabled={index === files.length - 1} 
                     onClick={() => moveFile(index, 'down')}
                   >
-                    <ArrowDown size={16} />
+                    <ArrowDown size={14} />
                   </button>
                   <button 
                     className="action-btn delete" 
                     title="Eliminar"
                     onClick={() => removeFile(item.id)}
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
             <button 
               className="btn-primary" 
               onClick={handleMerge}
@@ -250,10 +239,7 @@ export const MergePDF: React.FC = () => {
                   <span>Fusionando PDFs...</span>
                 </>
               ) : (
-                <>
-                  <Merge size={20} />
-                  <span>Unir PDFs y Descargar</span>
-                </>
+                <span>Unir PDFs y Descargar</span>
               )}
             </button>
             <button 

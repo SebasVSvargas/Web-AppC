@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { encryptPDF } from '@pdfsmaller/pdf-encrypt-lite';
-import { FileText, Lock, ShieldAlert, Eye, EyeOff, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface SelectedFile {
   file: File;
@@ -107,15 +107,12 @@ export const ProtectPDF: React.FC = () => {
     setSuccess(false);
 
     try {
-      // Encriptar el PDF localmente
-      // encryptPDF requiere un Uint8Array, la contraseña del usuario y opcionalmente la de propietario
       const encryptedBytes = await encryptPDF(
         new Uint8Array(file.arrayBuffer), 
         password,
         password // owner password
       );
 
-      // Crear un blob y descargar
       const blob = new Blob([encryptedBytes as any], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -141,23 +138,21 @@ export const ProtectPDF: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.5rem', color: 'white' }}>Añadir Contraseña a PDF</h2>
-        <p style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.95rem' }}>
-          Protege tus documentos PDF con encriptación RC4 de 128 bits. Nadie podrá abrir el archivo sin la contraseña que definas a continuación. Proceso 100% local en tu dispositivo.
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.35rem', color: 'hsl(var(--text-primary))' }}>Añadir Contraseña a PDF</h2>
+        <p style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.9rem' }}>
+          Protege tus documentos PDF con encriptación local estándar. Nadie podrá abrir el archivo sin la contraseña que definas a continuación.
         </p>
       </div>
 
       {error && (
         <div className="alert error">
-          <AlertTriangle className="alert-icon" size={20} />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
         <div className="alert success">
-          <CheckCircle className="alert-icon" size={20} />
-          <span>¡PDF protegido y descargado exitosamente! Intenta abrir el archivo descargado para comprobar la protección.</span>
+          <span>¡PDF protegido y descargado exitosamente! Comprueba la protección abriendo el archivo descargado.</span>
         </div>
       )}
 
@@ -177,36 +172,32 @@ export const ProtectPDF: React.FC = () => {
             accept=".pdf"
             onChange={handleFileInput}
           />
-          <div className="dropzone-icon" style={{ color: 'hsl(var(--color-primary))', background: 'rgba(139, 92, 246, 0.1)' }}>
-            <Lock size={32} />
-          </div>
           <div className="dropzone-text">
-            <h3>Arrastra y suelta tu PDF aquí</h3>
-            <p>o haz clic para buscar en tu dispositivo</p>
+            <h3>Arrastra y suelta tu archivo PDF aquí</h3>
+            <p style={{ margin: '0.25rem 0 0.85rem' }}>o selecciona el archivo desde tu dispositivo</p>
+            <span className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', pointerEvents: 'none' }}>
+              Seleccionar PDF
+            </span>
           </div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Card del Archivo Seleccionado */}
-          <div className="file-item" style={{ background: 'rgba(139, 92, 246, 0.05)', borderColor: 'rgba(139, 92, 246, 0.2)' }}>
-            <div className="file-item-icon" style={{ color: 'hsl(var(--color-secondary))' }}>
-              <FileText size={32} />
-            </div>
+          <div className="file-item" style={{ borderColor: 'hsl(var(--border-color))' }}>
             <div className="file-item-info">
-              <div className="file-item-name" style={{ fontSize: '1.1rem' }}>{file.name}</div>
+              <div className="file-item-name" style={{ fontSize: '1rem', fontWeight: 600 }}>{file.name}</div>
               <span className="file-item-size">{file.size} • Listo para encriptar</span>
             </div>
-            <button className="action-btn delete" onClick={() => { setFile(null); setSuccess(false); setError(null); }}>
-              Cambiar Archivo
+            <button className="action-btn delete" style={{ fontSize: '0.8rem', width: 'auto', padding: '0 0.5rem' }} onClick={() => { setFile(null); setSuccess(false); setError(null); }}>
+              Cambiar
             </button>
           </div>
 
           {/* Formulario de Contraseña */}
-          <form onSubmit={handleEncrypt} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid hsl(var(--border-color))', borderRadius: 'var(--radius-md)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid hsl(var(--border-color))', paddingBottom: '1rem', marginBottom: '0.5rem' }}>
-              <Lock size={20} style={{ color: 'hsl(var(--color-primary))' }} />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'white' }}>Configuración de Seguridad</h3>
-            </div>
+          <form onSubmit={handleEncrypt} style={{ background: 'hsl(var(--bg-secondary))', border: '1px solid hsl(var(--border-color))', borderRadius: 'var(--radius-lg)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'hsl(var(--text-primary))', borderBottom: '1px solid hsl(var(--border-color))', paddingBottom: '0.75rem', marginBottom: '0.25rem' }}>
+              Configuración de Seguridad
+            </h3>
 
             <div className="form-row">
               <div className="form-group" style={{ position: 'relative', flex: 1 }}>
@@ -237,7 +228,7 @@ export const ProtectPDF: React.FC = () => {
                       alignItems: 'center'
                     }}
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
@@ -256,13 +247,12 @@ export const ProtectPDF: React.FC = () => {
             </div>
 
             <div className="alert info" style={{ marginBottom: 0 }}>
-              <ShieldAlert className="alert-icon" size={20} />
               <span>
-                <strong>Atención:</strong> Recuerda guardar bien tu contraseña. Por seguridad y privacidad, este sitio no almacena tu contraseña en ningún servidor, por lo que no es posible recuperarla si la olvidas.
+                <strong>Atención:</strong> Guarda bien tu contraseña. Por motivos de privacidad y seguridad, esta aplicación no almacena tu contraseña en ningún servidor, por lo que es imposible recuperarla si la olvidas.
               </span>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
               <button 
                 type="submit" 
                 className="btn-primary" 
@@ -274,10 +264,7 @@ export const ProtectPDF: React.FC = () => {
                     <span>Encriptando PDF...</span>
                   </>
                 ) : (
-                  <>
-                    <Lock size={20} />
-                    <span>Aplicar Contraseña y Descargar</span>
-                  </>
+                  <span>Aplicar Contraseña y Descargar</span>
                 )}
               </button>
               <button 

@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
-import { Upload, FileText, Split, CheckCircle, AlertTriangle, Sparkles } from 'lucide-react';
 
 interface SelectedFile {
   file: File;
@@ -54,7 +53,6 @@ export const SplitPDF: React.FC = () => {
     setLoading(true);
     try {
       const arrayBuffer = await selectedFile.arrayBuffer();
-      // Leer el PDF para obtener el número de páginas
       const pdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
       const pageCount = pdf.getPageCount();
       
@@ -66,7 +64,6 @@ export const SplitPDF: React.FC = () => {
         arrayBuffer
       });
       
-      // Proponer un rango por defecto (ej: todas las páginas por separado o la mitad)
       setCustomRange(`1-${pageCount}`);
     } catch (err: any) {
       console.error(err);
@@ -145,12 +142,10 @@ export const SplitPDF: React.FC = () => {
       let rangesToExtract: number[][] = [];
 
       if (splitMode === 'individual') {
-        // Dividir cada página por separado
         for (let i = 0; i < totalPages; i++) {
           rangesToExtract.push([i]);
         }
       } else {
-        // Rangos personalizados
         if (!customRange.trim()) {
           setError("Por favor, introduce al menos un rango de páginas.");
           setLoading(false);
@@ -168,7 +163,6 @@ export const SplitPDF: React.FC = () => {
       const fileBaseName = file.name.replace(/\.[^/.]+$/, "");
 
       if (rangesToExtract.length === 1) {
-        // Si es solo una sección/archivo, descargamos directamente como PDF
         const newPdf = await PDFDocument.create();
         const copiedPages = await newPdf.copyPages(pdfDoc, rangesToExtract[0]);
         copiedPages.forEach((page) => newPdf.addPage(page));
@@ -185,7 +179,6 @@ export const SplitPDF: React.FC = () => {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       } else {
-        // Si son múltiples archivos, los comprimimos en un ZIP
         const zip = new JSZip();
         
         for (let index = 0; index < rangesToExtract.length; index++) {
@@ -222,23 +215,21 @@ export const SplitPDF: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.5rem', color: 'white' }}>Dividir Archivo PDF</h2>
-        <p style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.95rem' }}>
-          Extrae páginas específicas de un archivo PDF o divide todo el documento en páginas individuales en segundos y de manera 100% local.
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.35rem', color: 'hsl(var(--text-primary))' }}>Dividir Archivo PDF</h2>
+        <p style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.9rem' }}>
+          Extrae páginas específicas de un archivo PDF o divide todo el documento en páginas individuales en segundos y de manera local.
         </p>
       </div>
 
       {error && (
         <div className="alert error">
-          <AlertTriangle className="alert-icon" size={20} />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
         <div className="alert success">
-          <CheckCircle className="alert-icon" size={20} />
-          <span>¡PDF dividido exitosamente! La descarga del archivo ha comenzado.</span>
+          <span>¡PDF dividido exitosamente! La descarga ha comenzado.</span>
         </div>
       )}
 
@@ -258,39 +249,35 @@ export const SplitPDF: React.FC = () => {
             accept=".pdf"
             onChange={handleFileInput}
           />
-          <div className="dropzone-icon">
-            <Upload size={32} />
-          </div>
           <div className="dropzone-text">
-            <h3>Arrastra y suelta tu PDF aquí</h3>
-            <p>o haz clic para buscar en tu dispositivo</p>
+            <h3>Arrastra y suelta tu archivo PDF aquí</h3>
+            <p style={{ margin: '0.25rem 0 0.85rem' }}>o selecciona el archivo desde tu dispositivo</p>
+            <span className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', pointerEvents: 'none' }}>
+              Seleccionar Archivo
+            </span>
           </div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Card del Archivo Seleccionado */}
-          <div className="file-item" style={{ background: 'rgba(139, 92, 246, 0.05)', borderColor: 'rgba(139, 92, 246, 0.2)' }}>
-            <div className="file-item-icon" style={{ color: 'hsl(var(--color-secondary))' }}>
-              <FileText size={32} />
-            </div>
+          <div className="file-item" style={{ borderColor: 'hsl(var(--border-color))' }}>
             <div className="file-item-info">
-              <div className="file-item-name" style={{ fontSize: '1.1rem' }}>{file.name}</div>
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
+              <div className="file-item-name" style={{ fontSize: '1rem', fontWeight: 600 }}>{file.name}</div>
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.15rem' }}>
                 <span className="file-item-size">{file.size}</span>
-                <span style={{ color: 'hsl(var(--text-muted))', fontSize: '0.8rem' }}>•</span>
-                <span className="file-item-size" style={{ color: 'hsl(var(--color-secondary))', fontWeight: 600 }}>{file.pages} páginas</span>
+                <span style={{ color: 'hsl(var(--text-muted))', fontSize: '0.75rem' }}>•</span>
+                <span className="file-item-size" style={{ color: 'hsl(var(--color-primary))', fontWeight: 600 }}>{file.pages} páginas</span>
               </div>
             </div>
-            <button className="action-btn delete" onClick={() => { setFile(null); setSuccess(false); setError(null); }}>
-              Cambiar Archivo
+            <button className="action-btn delete" style={{ fontSize: '0.8rem', width: 'auto', padding: '0 0.5rem' }} onClick={() => { setFile(null); setSuccess(false); setError(null); }}>
+              Cambiar
             </button>
           </div>
 
           {/* Grid visual de páginas */}
           <div className="pdf-preview-box">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', alignSelf: 'flex-start', color: 'white', fontWeight: 500, fontSize: '0.9rem', marginBottom: '0.5rem' }}>
-              <Sparkles size={16} style={{ color: 'hsl(var(--color-secondary))' }} />
-              <span>Esquema de páginas del documento cargado:</span>
+            <div style={{ alignSelf: 'flex-start', color: 'hsl(var(--text-primary))', fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.35rem' }}>
+              Esquema de páginas del documento cargado:
             </div>
             <div className="pdf-page-grid">
               {Array.from({ length: file.pages }).map((_, i) => (
@@ -302,35 +289,35 @@ export const SplitPDF: React.FC = () => {
           </div>
 
           {/* Opciones de División */}
-          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid hsl(var(--border-color))', borderRadius: 'var(--radius-md)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'white' }}>Configuración de división</h3>
+          <div style={{ background: 'hsl(var(--bg-secondary))', border: '1px solid hsl(var(--border-color))', borderRadius: 'var(--radius-lg)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'hsl(var(--text-primary))' }}>Configuración de división</h3>
             
-            <div style={{ display: 'flex', gap: '1.5rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'white', cursor: 'pointer', fontSize: '0.95rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'hsl(var(--text-primary))', cursor: 'pointer', fontSize: '0.9rem' }}>
                 <input 
                   type="radio" 
                   name="splitMode" 
                   checked={splitMode === 'individual'} 
                   onChange={() => setSplitMode('individual')} 
-                  style={{ accentColor: 'hsl(var(--color-primary))', width: '18px', height: '18px' }}
+                  style={{ accentColor: 'hsl(var(--color-primary))', width: '16px', height: '16px' }}
                 />
                 <span>Separar todas las páginas ({file.pages} archivos en un ZIP)</span>
               </label>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'white', cursor: 'pointer', fontSize: '0.95rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'hsl(var(--text-primary))', cursor: 'pointer', fontSize: '0.9rem' }}>
                 <input 
                   type="radio" 
                   name="splitMode" 
                   checked={splitMode === 'ranges'} 
                   onChange={() => setSplitMode('ranges')} 
-                  style={{ accentColor: 'hsl(var(--color-primary))', width: '18px', height: '18px' }}
+                  style={{ accentColor: 'hsl(var(--color-primary))', width: '16px', height: '16px' }}
                 />
                 <span>Extraer rangos personalizados de páginas</span>
               </label>
             </div>
 
             {splitMode === 'ranges' && (
-              <div className="form-group" style={{ marginTop: '0.5rem' }}>
+              <div className="form-group" style={{ marginTop: '0.25rem' }}>
                 <label className="form-label">Especifica los rangos a extraer (ej. 1-2, 4, 6-8):</label>
                 <input 
                   type="text" 
@@ -339,13 +326,13 @@ export const SplitPDF: React.FC = () => {
                   value={customRange}
                   onChange={(e) => setCustomRange(e.target.value)}
                 />
-                <span style={{ color: 'hsl(var(--text-muted))', fontSize: '0.8rem' }}>
-                  Usa comas para separar múltiples archivos resultantes. El ejemplo de arriba creará 3 archivos PDF separados.
+                <span style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.75rem', marginTop: '0.15rem' }}>
+                  Usa comas para separar múltiples archivos resultantes.
                 </span>
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
               <button 
                 className="btn-primary" 
                 onClick={handleSplit}
@@ -357,10 +344,7 @@ export const SplitPDF: React.FC = () => {
                     <span>Procesando PDF...</span>
                   </>
                 ) : (
-                  <>
-                    <Split size={20} />
-                    <span>Dividir PDF y Descargar</span>
-                  </>
+                  <span>Dividir PDF y Descargar</span>
                 )}
               </button>
               <button 

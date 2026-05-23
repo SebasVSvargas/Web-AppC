@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { decryptPDF } from '@pdfsmaller/pdf-decrypt';
-import { Lock, Unlock, Eye, EyeOff, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface SelectedFile {
   file: File;
@@ -102,10 +102,8 @@ export const UnlockPDF: React.FC = () => {
     setSuccess(false);
 
     try {
-      // Intentar desencriptar el PDF localmente
       const decryptedBytes = await decryptPDF(new Uint8Array(file.arrayBuffer), password);
 
-      // Crear un blob y descargar
       const blob = new Blob([decryptedBytes as any], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -130,23 +128,21 @@ export const UnlockPDF: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.5rem', color: 'white' }}>Quitar Contraseña a PDF</h2>
-        <p style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.95rem' }}>
-          Desbloquea documentos PDF protegidos con contraseña al instante. Todo el proceso es 100% local en tu navegador para proteger tus datos sensibles.
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '0.35rem', color: 'hsl(var(--text-primary))' }}>Quitar Contraseña a PDF</h2>
+        <p style={{ color: 'hsl(var(--text-secondary))', fontSize: '0.9rem' }}>
+          Desbloquea documentos PDF protegidos con contraseña al instante. Todo el proceso es local para garantizar total confidencialidad.
         </p>
       </div>
 
       {error && (
         <div className="alert error">
-          <AlertTriangle className="alert-icon" size={20} />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
         <div className="alert success">
-          <CheckCircle className="alert-icon" size={20} />
-          <span>¡PDF desbloqueado y descargado exitosamente! Ya no requiere contraseña para abrirse.</span>
+          <span>¡PDF desbloqueado y descargado exitosamente! El archivo resultante ya no requiere contraseña.</span>
         </div>
       )}
 
@@ -166,36 +162,32 @@ export const UnlockPDF: React.FC = () => {
             accept=".pdf"
             onChange={handleFileInput}
           />
-          <div className="dropzone-icon" style={{ color: 'hsl(var(--color-primary))', background: 'rgba(139, 92, 246, 0.1)' }}>
-            <Lock size={32} />
-          </div>
           <div className="dropzone-text">
             <h3>Arrastra y suelta tu PDF protegido aquí</h3>
-            <p>o haz clic para buscar en tu dispositivo</p>
+            <p style={{ margin: '0.25rem 0 0.85rem' }}>o selecciona el archivo desde tu dispositivo</p>
+            <span className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', pointerEvents: 'none' }}>
+              Seleccionar PDF
+            </span>
           </div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Card del Archivo Seleccionado */}
-          <div className="file-item" style={{ background: 'rgba(139, 92, 246, 0.05)', borderColor: 'rgba(139, 92, 246, 0.2)' }}>
-            <div className="file-item-icon" style={{ color: 'hsl(var(--color-primary))' }}>
-              <Lock size={32} />
-            </div>
+          <div className="file-item" style={{ borderColor: 'hsl(var(--border-color))' }}>
             <div className="file-item-info">
-              <div className="file-item-name" style={{ fontSize: '1.1rem' }}>{file.name}</div>
-              <span className="file-item-size">{file.size} • Protegido con Contraseña</span>
+              <div className="file-item-name" style={{ fontSize: '1rem', fontWeight: 600 }}>{file.name}</div>
+              <span className="file-item-size">{file.size} • Archivo Protegido</span>
             </div>
-            <button className="action-btn delete" onClick={() => { setFile(null); setSuccess(false); setError(null); }}>
-              Cambiar Archivo
+            <button className="action-btn delete" style={{ fontSize: '0.8rem', width: 'auto', padding: '0 0.5rem' }} onClick={() => { setFile(null); setSuccess(false); setError(null); }}>
+              Cambiar
             </button>
           </div>
 
           {/* Formulario de Contraseña */}
-          <form onSubmit={handleDecrypt} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid hsl(var(--border-color))', borderRadius: 'var(--radius-md)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid hsl(var(--border-color))', paddingBottom: '1rem', marginBottom: '0.5rem' }}>
-              <Unlock size={20} style={{ color: 'hsl(var(--color-secondary))' }} />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'white' }}>Desbloquear Documento</h3>
-            </div>
+          <form onSubmit={handleDecrypt} style={{ background: 'hsl(var(--bg-secondary))', border: '1px solid hsl(var(--border-color))', borderRadius: 'var(--radius-lg)', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'hsl(var(--text-primary))', borderBottom: '1px solid hsl(var(--border-color))', paddingBottom: '0.75rem', marginBottom: '0.25rem' }}>
+              Desbloquear Documento
+            </h3>
 
             <div className="form-group" style={{ position: 'relative' }}>
               <label className="form-label">Introduce la contraseña de apertura del PDF:</label>
@@ -203,7 +195,7 @@ export const UnlockPDF: React.FC = () => {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   className="form-input" 
-                  placeholder="Contraseña del PDF"
+                  placeholder="Contraseña de apertura"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   style={{ paddingRight: '3rem' }}
@@ -225,12 +217,12 @@ export const UnlockPDF: React.FC = () => {
                     alignItems: 'center'
                   }}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
               <button 
                 type="submit" 
                 className="btn-primary" 
@@ -242,10 +234,7 @@ export const UnlockPDF: React.FC = () => {
                     <span>Desbloqueando PDF...</span>
                   </>
                 ) : (
-                  <>
-                    <Unlock size={20} />
-                    <span>Eliminar Contraseña y Descargar</span>
-                  </>
+                  <span>Eliminar Contraseña y Descargar</span>
                 )}
               </button>
               <button 

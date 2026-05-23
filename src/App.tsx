@@ -1,14 +1,7 @@
 import { useState } from 'react';
 import { 
   FileText, 
-  Merge, 
-  Split, 
-  Lock, 
-  Unlock, 
-  Database, 
-  Calendar, 
-  Users, 
-  ShieldAlert 
+  Calendar 
 } from 'lucide-react';
 import { MergePDF } from './components/PDFTools/MergePDF';
 import { SplitPDF } from './components/PDFTools/SplitPDF';
@@ -24,14 +17,11 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Luces de fondo difusas decorativas */}
-      <div className="glow-backdrop" />
-
       {/* Barra Lateral (Sidebar) */}
       <aside className="sidebar">
         <div className="brand-section">
           <div className="brand-icon">
-            <FileText size={22} />
+            <FileText size={18} />
           </div>
           <span className="brand-name">CATAPP</span>
         </div>
@@ -41,7 +31,7 @@ function App() {
             className={`nav-item ${activeSection === 'pdf-tools' ? 'active' : ''}`}
             onClick={() => setActiveSection('pdf-tools')}
           >
-            <FileText size={18} />
+            <FileText size={16} />
             <span>Herramientas PDF</span>
           </button>
           
@@ -49,7 +39,7 @@ function App() {
             className={`nav-item ${activeSection === 'cosmetology' ? 'active' : ''}`}
             onClick={() => setActiveSection('cosmetology')}
           >
-            <Calendar size={18} />
+            <Calendar size={16} />
             <span>Citas y Cosmetología</span>
             <span className="coming-soon-badge">Fase 2</span>
           </button>
@@ -68,9 +58,9 @@ function App() {
         {activeSection === 'pdf-tools' ? (
           <>
             <header className="header-section">
-              <h1 className="header-title">Herramientas PDF Inteligentes</h1>
+              <h1 className="header-title">Herramientas PDF</h1>
               <p className="header-subtitle">
-                Modifica tus archivos PDF de forma instantánea. Todo el procesamiento se realiza 100% de forma local en tu navegador para máxima velocidad y total privacidad.
+                Modifica tus archivos PDF de forma instantánea. Todo el procesamiento se realiza 100% en tu navegador para garantizar máxima velocidad y total privacidad.
               </p>
             </header>
 
@@ -80,9 +70,6 @@ function App() {
                 className={`tool-tab-card ${activeTool === 'merge' ? 'active' : ''}`}
                 onClick={() => setActiveTool('merge')}
               >
-                <div className="tool-icon-wrapper">
-                  <Merge size={22} />
-                </div>
                 <div className="tool-info">
                   <span className="tool-title">Unir PDFs</span>
                   <span className="tool-description">Combina múltiples archivos PDF en un solo documento.</span>
@@ -93,9 +80,6 @@ function App() {
                 className={`tool-tab-card ${activeTool === 'split' ? 'active' : ''}`}
                 onClick={() => setActiveTool('split')}
               >
-                <div className="tool-icon-wrapper">
-                  <Split size={22} />
-                </div>
                 <div className="tool-info">
                   <span className="tool-title">Dividir PDF</span>
                   <span className="tool-description">Extrae rangos específicos o separa todas las páginas.</span>
@@ -106,9 +90,6 @@ function App() {
                 className={`tool-tab-card ${activeTool === 'unlock' ? 'active' : ''}`}
                 onClick={() => setActiveTool('unlock')}
               >
-                <div className="tool-icon-wrapper">
-                  <Unlock size={22} />
-                </div>
                 <div className="tool-info">
                   <span className="tool-title">Quitar Contraseña</span>
                   <span className="tool-description">Elimina la protección y restricciones de tus PDFs.</span>
@@ -119,9 +100,6 @@ function App() {
                 className={`tool-tab-card ${activeTool === 'protect' ? 'active' : ''}`}
                 onClick={() => setActiveTool('protect')}
               >
-                <div className="tool-icon-wrapper">
-                  <Lock size={22} />
-                </div>
                 <div className="tool-info">
                   <span className="tool-title">Proteger con Clave</span>
                   <span className="tool-description">Encripta y restringe el acceso mediante contraseña.</span>
@@ -158,7 +136,6 @@ function App() {
 
                 <div className="features-preview-grid">
                   <div className="feature-preview-card">
-                    <Users size={20} style={{ color: 'hsl(var(--color-primary))' }} />
                     <span className="feature-preview-title">Expediente de Clientes</span>
                     <span className="feature-preview-desc">
                       Guarda nombre, contacto, EPS, antecedentes clínicos, tipo de piel y notas estéticas.
@@ -166,7 +143,6 @@ function App() {
                   </div>
 
                   <div className="feature-preview-card">
-                    <Calendar size={20} style={{ color: 'hsl(var(--color-secondary))' }} />
                     <span className="feature-preview-title">Agenda Interactiva</span>
                     <span className="feature-preview-desc">
                       Programa, edita y cancela citas de cosmetología con alertas visuales de fechas.
@@ -174,7 +150,6 @@ function App() {
                   </div>
 
                   <div className="feature-preview-card">
-                    <Database size={20} style={{ color: 'hsl(var(--color-accent))' }} />
                     <span className="feature-preview-title">Sincronización en la Nube</span>
                     <span className="feature-preview-desc">
                       Conectado directamente a una base de datos segura en Supabase para acceso multidispositivo.
@@ -182,7 +157,6 @@ function App() {
                   </div>
 
                   <div className="feature-preview-card">
-                    <ShieldAlert size={20} style={{ color: 'hsl(var(--color-success))' }} />
                     <span className="feature-preview-title">Reportes de Ingresos</span>
                     <span className="feature-preview-desc">
                       Monitorea el costo acumulado de los tratamientos y el estatus de pago de cada cita.
