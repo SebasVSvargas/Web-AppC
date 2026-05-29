@@ -785,3 +785,42 @@ body {
     padding: 1.25rem;
   }
 }
+
+/* Sub-menús en la barra lateral */
+.sub-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-left: 1.25rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  border-left: 1px solid rgba(217, 78, 115, 0.15);
+  margin-left: 0.85rem;
+}
+
+.sub-nav-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: hsl(var(--text-secondary));
+  padding: 0.4rem 0.5rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+}
+
+.sub-nav-item:hover {
+  color: hsl(var(--color-primary));
+  background: rgba(217, 78, 115, 0.04);
+}
+
+.sub-nav-item.active {
+  color: hsl(var(--color-primary));
+  font-weight: 600;
+  background: rgba(217, 78, 115, 0.08);
+}

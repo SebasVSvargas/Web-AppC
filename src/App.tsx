@@ -8,12 +8,23 @@ import { SplitPDF } from './components/PDFTools/SplitPDF';
 import { UnlockPDF } from './components/PDFTools/UnlockPDF';
 import { ProtectPDF } from './components/PDFTools/ProtectPDF';
 
-type MainSection = 'pdf-tools' | 'cosmetology';
+// Componentes del Módulo de Dermatología
+import { PatientManager } from './components/CRM/PatientManager';
+import { ConsultationForm } from './components/CRM/ConsultationForm';
+import { HistoryDashboard } from './components/CRM/HistoryDashboard';
+import { SettingsPanel } from './components/CRM/SettingsPanel';
+import { ReportsManager } from './components/CRM/ReportsManager';
+
+type MainSection = 'pdf-tools' | 'dermatology';
 type PDFToolType = 'merge' | 'split' | 'unlock' | 'protect';
+type DermatologyToolType = 'patients' | 'consultations' | 'history' | 'settings' | 'reports';
 
 function App() {
   const [activeSection, setActiveSection] = useState<MainSection>('pdf-tools');
-  const [activeTool, setActiveTool] = useState<PDFToolType>('merge');
+  
+  // Estados de pestañas de cada sección
+  const [activePDFTool, setActivePDFTool] = useState<PDFToolType>('merge');
+  const [activeDermaTool, setActiveDermaTool] = useState<DermatologyToolType>('patients');
 
   return (
     <div className="app-container">
@@ -27,28 +38,93 @@ function App() {
         </div>
 
         <nav className="nav-menu">
-          <button 
-            className={`nav-item ${activeSection === 'pdf-tools' ? 'active' : ''}`}
-            onClick={() => setActiveSection('pdf-tools')}
-          >
-            <FileText size={16} />
-            <span>Herramientas PDF</span>
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <button 
+              className={`nav-item ${activeSection === 'pdf-tools' ? 'active' : ''}`}
+              onClick={() => setActiveSection('pdf-tools')}
+            >
+              <FileText size={16} />
+              <span>Herramientas PDF</span>
+            </button>
+            {activeSection === 'pdf-tools' && (
+              <div className="sub-menu">
+                <button 
+                  className={`sub-nav-item ${activePDFTool === 'merge' ? 'active' : ''}`}
+                  onClick={() => setActivePDFTool('merge')}
+                >
+                  Unir PDFs
+                </button>
+                <button 
+                  className={`sub-nav-item ${activePDFTool === 'split' ? 'active' : ''}`}
+                  onClick={() => setActivePDFTool('split')}
+                >
+                  Dividir PDF
+                </button>
+                <button 
+                  className={`sub-nav-item ${activePDFTool === 'unlock' ? 'active' : ''}`}
+                  onClick={() => setActivePDFTool('unlock')}
+                >
+                  Quitar Contraseña
+                </button>
+                <button 
+                  className={`sub-nav-item ${activePDFTool === 'protect' ? 'active' : ''}`}
+                  onClick={() => setActivePDFTool('protect')}
+                >
+                  Proteger con Clave
+                </button>
+              </div>
+            )}
+          </div>
           
-          <button 
-            className={`nav-item ${activeSection === 'cosmetology' ? 'active' : ''}`}
-            onClick={() => setActiveSection('cosmetology')}
-          >
-            <Calendar size={16} />
-            <span>Citas y Cosmetología</span>
-            <span className="coming-soon-badge">Fase 2</span>
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <button 
+              className={`nav-item ${activeSection === 'dermatology' ? 'active' : ''}`}
+              onClick={() => setActiveSection('dermatology')}
+            >
+              <Calendar size={16} />
+              <span>Gestión Dermatológica</span>
+            </button>
+            {activeSection === 'dermatology' && (
+              <div className="sub-menu">
+                <button 
+                  className={`sub-nav-item ${activeDermaTool === 'patients' ? 'active' : ''}`}
+                  onClick={() => setActiveDermaTool('patients')}
+                >
+                  Pacientes
+                </button>
+                <button 
+                  className={`sub-nav-item ${activeDermaTool === 'consultations' ? 'active' : ''}`}
+                  onClick={() => setActiveDermaTool('consultations')}
+                >
+                  Registrar Consulta
+                </button>
+                <button 
+                  className={`sub-nav-item ${activeDermaTool === 'history' ? 'active' : ''}`}
+                  onClick={() => setActiveDermaTool('history')}
+                >
+                  Historial & Dashboard
+                </button>
+                <button 
+                  className={`sub-nav-item ${activeDermaTool === 'reports' ? 'active' : ''}`}
+                  onClick={() => setActiveDermaTool('reports')}
+                >
+                  Reportes Clínicos
+                </button>
+                <button 
+                  className={`sub-nav-item ${activeDermaTool === 'settings' ? 'active' : ''}`}
+                  onClick={() => setActiveDermaTool('settings')}
+                >
+                  Convenios y Precios
+                </button>
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="sidebar-footer">
           <div className="db-status">
             <div className="status-dot local"></div>
-            <span>Base de Datos: Modo Local</span>
+            <span>catadb local conectada</span>
           </div>
         </div>
       </aside>
@@ -64,114 +140,31 @@ function App() {
               </p>
             </header>
 
-            {/* Selector de sub-herramientas PDF */}
-            <section className="pdf-tools-tabs">
-              <button 
-                className={`tool-tab-card ${activeTool === 'merge' ? 'active' : ''}`}
-                onClick={() => setActiveTool('merge')}
-              >
-                <div className="tool-info">
-                  <span className="tool-title">Unir PDFs</span>
-                  <span className="tool-description">Combina múltiples archivos PDF en un solo documento.</span>
-                </div>
-              </button>
-
-              <button 
-                className={`tool-tab-card ${activeTool === 'split' ? 'active' : ''}`}
-                onClick={() => setActiveTool('split')}
-              >
-                <div className="tool-info">
-                  <span className="tool-title">Dividir PDF</span>
-                  <span className="tool-description">Extrae rangos específicos o separa todas las páginas.</span>
-                </div>
-              </button>
-
-              <button 
-                className={`tool-tab-card ${activeTool === 'unlock' ? 'active' : ''}`}
-                onClick={() => setActiveTool('unlock')}
-              >
-                <div className="tool-info">
-                  <span className="tool-title">Quitar Contraseña</span>
-                  <span className="tool-description">Elimina la protección y restricciones de tus PDFs.</span>
-                </div>
-              </button>
-
-              <button 
-                className={`tool-tab-card ${activeTool === 'protect' ? 'active' : ''}`}
-                onClick={() => setActiveTool('protect')}
-              >
-                <div className="tool-info">
-                  <span className="tool-title">Proteger con Clave</span>
-                  <span className="tool-description">Encripta y restringe el acceso mediante contraseña.</span>
-                </div>
-              </button>
-            </section>
-
             {/* Área de Trabajo del Componente Seleccionado */}
             <section className="workspace-panel">
-              {activeTool === 'merge' && <MergePDF />}
-              {activeTool === 'split' && <SplitPDF />}
-              {activeTool === 'unlock' && <UnlockPDF />}
-              {activeTool === 'protect' && <ProtectPDF />}
+              {activePDFTool === 'merge' && <MergePDF />}
+              {activePDFTool === 'split' && <SplitPDF />}
+              {activePDFTool === 'unlock' && <UnlockPDF />}
+              {activePDFTool === 'protect' && <ProtectPDF />}
             </section>
           </>
         ) : (
-          /* Módulo de Cosmetología (Elegante Placeholder para la Fase 2) */
+          /* Módulo de Dermatología (Fase 2 - 100% Funcional e Integrado) */
           <>
             <header className="header-section">
-              <h1 className="header-title">Gestión de Citas y Cosmetología</h1>
+              <h1 className="header-title">Gestión Dermatológica</h1>
               <p className="header-subtitle">
-                Sistema CRM profesional diseñado para cosmetólogas y estéticas. Almacena clientes, programa citas y calcula costos.
+                Sistema CRM profesional de dermatología. Registra pacientes, administra tratamientos y consulta el historial médico-financiero.
               </p>
             </header>
 
-            <section className="workspace-panel" style={{ justifyContent: 'center' }}>
-              <div className="coming-soon-container">
-                <h2 className="coming-soon-title">Módulo en Desarrollo (Fase 2)</h2>
-                <p className="coming-soon-desc">
-                  Este panel estará disponible una vez que compruebes y verifiques el funcionamiento completo del suite de herramientas PDF.
-                  En la siguiente fase, integraremos este módulo con **Supabase** para ofrecerte persistencia en tiempo real en la nube,
-                  permitiendo registrar datos completos de clientes, fechas de citas cosmetológicas, costos de tratamiento, y tipo de EPS de forma totalmente segura.
-                </p>
-
-                <div className="features-preview-grid">
-                  <div className="feature-preview-card">
-                    <span className="feature-preview-title">Expediente de Clientes</span>
-                    <span className="feature-preview-desc">
-                      Guarda nombre, contacto, EPS, antecedentes clínicos, tipo de piel y notas estéticas.
-                    </span>
-                  </div>
-
-                  <div className="feature-preview-card">
-                    <span className="feature-preview-title">Agenda Interactiva</span>
-                    <span className="feature-preview-desc">
-                      Programa, edita y cancela citas de cosmetología con alertas visuales de fechas.
-                    </span>
-                  </div>
-
-                  <div className="feature-preview-card">
-                    <span className="feature-preview-title">Sincronización en la Nube</span>
-                    <span className="feature-preview-desc">
-                      Conectado directamente a una base de datos segura en Supabase para acceso multidispositivo.
-                    </span>
-                  </div>
-
-                  <div className="feature-preview-card">
-                    <span className="feature-preview-title">Reportes de Ingresos</span>
-                    <span className="feature-preview-desc">
-                      Monitorea el costo acumulado de los tratamientos y el estatus de pago de cada cita.
-                    </span>
-                  </div>
-                </div>
-
-                <button 
-                  className="btn-primary" 
-                  style={{ marginTop: '1.5rem' }} 
-                  onClick={() => setActiveSection('pdf-tools')}
-                >
-                  Regresar a las Herramientas PDF
-                </button>
-              </div>
+            {/* Área de Trabajo de Dermatología */}
+            <section className="workspace-panel">
+              {activeDermaTool === 'patients' && <PatientManager />}
+              {activeDermaTool === 'consultations' && <ConsultationForm onSaveSuccess={() => setActiveDermaTool('history')} />}
+              {activeDermaTool === 'history' && <HistoryDashboard />}
+              {activeDermaTool === 'reports' && <ReportsManager />}
+              {activeDermaTool === 'settings' && <SettingsPanel />}
             </section>
           </>
         )}
