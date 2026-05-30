@@ -2,10 +2,10 @@ import type { DermatologyRepository } from './DermatologyRepository';
 import { LocalAPIRepository } from './LocalAPIRepository';
 import { SupabaseRepository } from './SupabaseRepository';
 
-// Conmutador del repositorio. 
-// - 'local-api': Se conecta al microservidor Express local (PostgreSQL local).
-// - 'supabase': Se conecta de forma directa a la nube de Supabase (PostgreSQL en la nube).
-export const REPOSITORY_MODE: 'local-api' | 'supabase' = 'local-api';
+// Conmutador del repositorio automático. 
+// - En local (desarrollo): Se conecta a 'local-api' (microservidor Express local).
+// - En Vercel (producción): Se conecta a 'supabase' (nube directa de Supabase).
+export const REPOSITORY_MODE: 'local-api' | 'supabase' = import.meta.env.PROD ? 'supabase' : 'local-api';
 
 let activeRepository: DermatologyRepository;
 
