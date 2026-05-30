@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   FileText, 
   Calendar 
@@ -15,7 +15,6 @@ import { HistoryDashboard } from './components/CRM/HistoryDashboard';
 import { SettingsPanel } from './components/CRM/SettingsPanel';
 import { ReportsManager } from './components/CRM/ReportsManager';
 import { AuthPanel } from './components/CRM/AuthPanel';
-import db from './services/config';
 
 type MainSection = 'pdf-tools' | 'dermatology';
 type PDFToolType = 'merge' | 'split' | 'unlock' | 'protect';
@@ -28,44 +27,17 @@ function App() {
   const [activePDFTool, setActivePDFTool] = useState<PDFToolType>('merge');
   const [activeDermaTool, setActiveDermaTool] = useState<DermatologyToolType>('patients');
 
-  // Estado de sesión del médico
-  const [doctor, setDoctor] = useState<{ email: string; nombres: string; apellidos: string } | null>(null);
-  const [checkingAuth, setCheckingAuth] = useState<boolean>(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const currentDoc = await db.getCurrentDoctor();
-        setDoctor(currentDoc);
-      } catch (err) {
-        console.error('Error al verificar sesión de médico:', err);
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
-    checkAuth();
-  }, []);
+  // Estado de sesión del médico (Simulado temporalmente por solicitud del usuario para omitir login)
+  const [doctor, setDoctor] = useState<{ email: string; nombres: string; apellidos: string } | null>({
+    email: 'doctora@catapp.com',
+    nombres: 'Camila',
+    apellidos: 'Restrepo'
+  });
 
   const handleSignOut = async () => {
-    try {
-      await db.signOutDoctor();
-      setDoctor(null);
-      setActiveSection('pdf-tools');
-    } catch (err) {
-      console.error('Error al cerrar sesión:', err);
-    }
+    // Omitimos remover sesión para mantener el acceso libre activo
+    setActiveSection('pdf-tools');
   };
-
-  if (checkingAuth) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'hsl(var(--bg-primary))', color: 'hsl(var(--text-secondary))' }}>
-        <div style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'hsl(var(--color-primary))', letterSpacing: '1px' }}>CATAPP</h2>
-          <p style={{ fontSize: '0.85rem', marginTop: '0.5rem', color: 'hsl(var(--text-muted))' }}>Iniciando sesión segura...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="app-container">
