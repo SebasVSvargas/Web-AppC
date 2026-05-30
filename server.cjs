@@ -2,12 +2,30 @@ require('dotenv').config();
 const express = require('express');
 const { Client, Pool } = require('pg');
 const cors = require('cors');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Funciones de encriptación PBKDF2 nativa (SHA-512) para evitar dependencias C++
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password, storedPasswordHash) {
+  try {
+    const [salt, originalHash] = storedPasswordHash.split(':');
+    const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+    return hash === originalHash;
+  } catch (e) {
+    return false;
+  }
+}
 
 // 1. Configuración de parámetros de conexión
 const dbConfig = {
@@ -99,7 +117,24 @@ async function initializeDatabase() {
       )
     `);
 
-    // D. Crear Tabla Consultas
+    // Asegurar columna email en clientes (migración para DB existente)
+    await pool.query(`
+      ALTER TABLE clientes ADD COLUMN IF NOT EXISTS email VARCHAR(150) UNIQUE
+    `);
+
+    // D. Crear Tabla Medicos (Médicos autorizados)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS medicos (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        nombres VARCHAR(100) NOT NULL,
+        apellidos VARCHAR(100) NOT NULL,
+        email VARCHAR(150) UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // E. Crear Tabla Consultas
     await pool.query(`
       CREATE TABLE IF NOT EXISTS consultas (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -154,13 +189,13 @@ async function seedData() {
 
     // C. Sembrar Clientes
     const cliente1 = await pool.query(
-      'INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-      ['Camila', 'Restrepo Gómez', '1020304050', '3104567890', '1995-04-18', suraId]
+      'INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+      ['Camila', 'Restrepo Gómez', '1020304050', '3104567890', '1995-04-18', suraId, 'camila.restrepo@mail.com']
     );
 
     const cliente2 = await pool.query(
-      'INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-      ['Juan Carlos', 'Giraldo Ospina', '80203040', '3157654321', '1989-11-23', sanitasId]
+      'INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+      ['Juan Carlos', 'Giraldo Ospina', '80203040', '3157654321', '1989-11-23', sanitasId, 'juan.giraldo@mail.com']
     );
 
     const c1Id = cliente1.rows[0].id;
@@ -232,14 +267,14 @@ async function seedData() {
     const c2Id = cJuan.rows[0].id;
 
     // Sementar los 8 nuevos clientes
-    const p1 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", ['Sofía', 'Restrepo Osorio', '1040506070', '3001234567', '1997-08-12', suraId]);
-    const p2 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", ['Mateo', 'Salazar Ríos', '1050607080', '3119876543', '1992-03-25', sanitasId]);
-    const p3 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", ['Valeria', 'Muñoz Velez', '1060708090', '3205556677', '2000-11-05', compensarId]);
-    const p4 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", ['Alejandro', 'Toro Patiño', '1070809000', '3154443322', '1985-05-30', particularId]);
-    const p5 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", ['Isabella', 'Ortiz Londoño', '1080901020', '3182221100', '1994-01-14', suraId]);
-    const p6 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", ['Daniel', 'Castro Bermúdez', '1090102030', '3126667788', '1990-12-01', sanitasId]);
-    const p7 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", ['Gabriela', 'Peña Alzate', '1101203040', '3019998877', '2002-06-18', compensarId]);
-    const p8 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", ['Nicolás', 'Henao Villegas', '1112223330', '3047778899', '1988-09-09', particularId]);
+    const p1 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", ['Sofía', 'Restrepo Osorio', '1040506070', '3001234567', '1997-08-12', suraId, 'sofia.restrepo@mail.com']);
+    const p2 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", ['Mateo', 'Salazar Ríos', '1050607080', '3119876543', '1992-03-25', sanitasId, 'mateo.salazar@mail.com']);
+    const p3 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", ['Valeria', 'Muñoz Velez', '1060708090', '3205556677', '2000-11-05', compensarId, 'valeria.munoz@mail.com']);
+    const p4 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", ['Alejandro', 'Toro Patiño', '1070809000', '3154443322', '1985-05-30', particularId, 'alejandro.toro@mail.com']);
+    const p5 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", ['Isabella', 'Ortiz Londoño', '1080901020', '3182221100', '1994-01-14', suraId, 'isabella.ortiz@mail.com']);
+    const p6 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", ['Daniel', 'Castro Bermúdez', '1090102030', '3126667788', '1990-12-01', sanitasId, 'daniel.castro@mail.com']);
+    const p7 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", ['Gabriela', 'Peña Alzate', '1101203040', '3019998877', '2002-06-18', compensarId, 'gabriela.pena@mail.com']);
+    const p8 = await pool.query("INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", ['Nicolás', 'Henao Villegas', '1112223330', '3047778899', '1988-09-09', particularId, 'nicolas.henao@mail.com']);
 
     const p1Id = p1.rows[0].id;
     const p2Id = p2.rows[0].id;
@@ -373,11 +408,11 @@ app.get('/api/clientes', async (req, res) => {
 });
 
 app.post('/api/clientes', async (req, res) => {
-  const { nombres, apellidos, documento, celular, fecha_nacimiento, eps_id } = req.body;
+  const { nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email } = req.body;
   try {
     const result = await pool.query(
-      'INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [nombres, apellidos, documento, celular, fecha_nacimiento, eps_id || null]
+      'INSERT INTO clientes (nombres, apellidos, documento, celular, fecha_nacimiento, eps_id, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [nombres, apellidos, documento, celular, fecha_nacimiento, eps_id || null, email || null]
     );
     
     // Obtener los datos unidos para retornar la respuesta completa
@@ -479,6 +514,60 @@ app.post('/api/consultas', async (req, res) => {
 
     res.status(201).json(fullConsultation.rows[0]);
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- MÉDICOS (Autenticación) ---
+app.post('/api/medicos/signup', async (req, res) => {
+  const { nombres, apellidos, email, password } = req.body;
+  if (!nombres || !apellidos || !email || !password) {
+    return res.status(400).json({ error: 'Por favor, completa todos los campos del formulario.' });
+  }
+
+  try {
+    const exists = await pool.query('SELECT 1 FROM medicos WHERE email = $1', [email]);
+    if (exists.rowCount > 0) {
+      return res.status(400).json({ error: 'Este correo electrónico ya se encuentra registrado.' });
+    }
+
+    const passwordHash = hashPassword(password);
+    const result = await pool.query(
+      'INSERT INTO medicos (nombres, apellidos, email, password_hash) VALUES ($1, $2, $3, $4) RETURNING id, nombres, apellidos, email',
+      [nombres, apellidos, email, passwordHash]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error('Error al registrar médico:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/medicos/login', async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Por favor, ingresa tu correo y contraseña.' });
+  }
+
+  try {
+    const result = await pool.query('SELECT * FROM medicos WHERE email = $1', [email]);
+    if (result.rowCount === 0) {
+      return res.status(401).json({ error: 'Correo o contraseña incorrectos.' });
+    }
+
+    const doctor = result.rows[0];
+    const isValid = verifyPassword(password, doctor.password_hash);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Correo o contraseña incorrectos.' });
+    }
+
+    res.json({
+      email: doctor.email,
+      nombres: doctor.nombres,
+      apellidos: doctor.apellidos
+    });
+  } catch (err) {
+    console.error('Error al iniciar sesión:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

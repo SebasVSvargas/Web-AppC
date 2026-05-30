@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   FileText, 
   Calendar 
@@ -14,6 +14,8 @@ import { ConsultationForm } from './components/CRM/ConsultationForm';
 import { HistoryDashboard } from './components/CRM/HistoryDashboard';
 import { SettingsPanel } from './components/CRM/SettingsPanel';
 import { ReportsManager } from './components/CRM/ReportsManager';
+import { AuthPanel } from './components/CRM/AuthPanel';
+import db from './services/config';
 
 type MainSection = 'pdf-tools' | 'dermatology';
 type PDFToolType = 'merge' | 'split' | 'unlock' | 'protect';
@@ -25,6 +27,45 @@ function App() {
   // Estados de pestañas de cada sección
   const [activePDFTool, setActivePDFTool] = useState<PDFToolType>('merge');
   const [activeDermaTool, setActiveDermaTool] = useState<DermatologyToolType>('patients');
+
+  // Estado de sesión del médico
+  const [doctor, setDoctor] = useState<{ email: string; nombres: string; apellidos: string } | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState<boolean>(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const currentDoc = await db.getCurrentDoctor();
+        setDoctor(currentDoc);
+      } catch (err) {
+        console.error('Error al verificar sesión de médico:', err);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await db.signOutDoctor();
+      setDoctor(null);
+      setActiveSection('pdf-tools');
+    } catch (err) {
+      console.error('Error al cerrar sesión:', err);
+    }
+  };
+
+  if (checkingAuth) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'hsl(var(--bg-primary))', color: 'hsl(var(--text-secondary))' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'hsl(var(--color-primary))', letterSpacing: '1px' }}>CATAPP</h2>
+          <p style={{ fontSize: '0.85rem', marginTop: '0.5rem', color: 'hsl(var(--text-muted))' }}>Iniciando sesión segura...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
@@ -84,7 +125,7 @@ function App() {
               <Calendar size={16} />
               <span>Gestión Dermatológica</span>
             </button>
-            {activeSection === 'dermatology' && (
+            {activeSection === 'dermatology' && doctor && (
               <div className="sub-menu">
                 <button 
                   className={`sub-nav-item ${activeDermaTool === 'patients' ? 'active' : ''}`}
@@ -121,7 +162,34 @@ function App() {
           </div>
         </nav>
 
-        <div className="sidebar-footer">
+        <div className="sidebar-footer" style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', borderTop: '1px solid hsl(var(--border-color))', paddingTop: '1rem' }}>
+          {doctor && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', paddingBottom: '0.25rem' }}>
+              <span style={{ fontSize: '0.7rem', color: 'hsl(var(--text-muted))', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                Médico Autenticado
+              </span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'hsl(var(--text-primary))' }} title={doctor.email}>
+                Dra. {doctor.nombres} {doctor.apellidos}
+              </span>
+              <button 
+                onClick={handleSignOut}
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: 'hsl(var(--color-error))', 
+                  fontSize: '0.76rem', 
+                  fontWeight: 700, 
+                  cursor: 'pointer', 
+                  textAlign: 'left',
+                  padding: 0,
+                  textDecoration: 'underline',
+                  marginTop: '0.15rem'
+                }}
+              >
+                Cerrar Sesión
+              </button>
+            </div>
+          )}
           <div className="db-status">
             <div className="status-dot local"></div>
             <span>catadb local conectada</span>
@@ -158,13 +226,19 @@ function App() {
               </p>
             </header>
 
-            {/* Área de Trabajo de Dermatología */}
+            {/* Área de Trabajo de Dermatología con Control de Acceso */}
             <section className="workspace-panel">
-              {activeDermaTool === 'patients' && <PatientManager />}
-              {activeDermaTool === 'consultations' && <ConsultationForm onSaveSuccess={() => setActiveDermaTool('history')} />}
-              {activeDermaTool === 'history' && <HistoryDashboard />}
-              {activeDermaTool === 'reports' && <ReportsManager />}
-              {activeDermaTool === 'settings' && <SettingsPanel />}
+              {!doctor ? (
+                <AuthPanel onLoginSuccess={(doc) => setDoctor(doc)} />
+              ) : (
+                <>
+                  {activeDermaTool === 'patients' && <PatientManager />}
+                  {activeDermaTool === 'consultations' && <ConsultationForm onSaveSuccess={() => setActiveDermaTool('history')} />}
+                  {activeDermaTool === 'history' && <HistoryDashboard />}
+                  {activeDermaTool === 'reports' && <ReportsManager />}
+                  {activeDermaTool === 'settings' && <SettingsPanel />}
+                </>
+              )}
             </section>
           </>
         )}

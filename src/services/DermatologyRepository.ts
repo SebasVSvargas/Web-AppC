@@ -23,6 +23,7 @@ export interface Patient {
   eps_id?: string;
   eps_nombre?: string;
   eps_cobertura?: number;
+  email?: string;
   created_at?: string;
 }
 
@@ -63,4 +64,10 @@ export interface DermatologyRepository {
   getConsultations(): Promise<Consultation[]>;
   getPatientConsultations(patientId: string): Promise<Consultation[]>;
   createConsultation(consultation: Omit<Consultation, 'id' | 'created_at' | 'cliente_nombres' | 'cliente_apellidos' | 'cliente_documento' | 'tratamiento_nombre' | 'eps_nombre'>): Promise<Consultation>;
+
+  // --- Autenticación de Médicos ---
+  signUpDoctor(nombres: string, apellidos: string, email: string, password: string): Promise<void>;
+  signInDoctor(email: string, password: string): Promise<{ email: string; nombres: string; apellidos: string }>;
+  getCurrentDoctor(): Promise<{ email: string; nombres: string; apellidos: string } | null>;
+  signOutDoctor(): Promise<void>;
 }

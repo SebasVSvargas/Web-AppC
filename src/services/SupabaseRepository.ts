@@ -202,4 +202,52 @@ export class SupabaseRepository implements DermatologyRepository {
       eps_nombre: fullConsultation.eps?.nombre || undefined
     } as Consultation;
   }
+
+  // --- Autenticación de Médicos ---
+  async signUpDoctor(nombres: string, apellidos: string, email: string, password: string): Promise<void> {
+    const { error } = await this.supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          nombres,
+          apellidos
+        }
+      }
+    });
+    if (error) throw error;
+  }
+
+  async signInDoctor(email: string, password: string): Promise<{ email: string; nombres: string; apellidos: string }> {
+    const { data, error } = await this.supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    if (error) throw error;
+    if (!data.user) throw new Error('No se pudo autenticar el usuario en Supabase.');
+
+    const meta = data.user.user_metadata || {};
+    return {
+      email: data.user.email || email,
+      nombres: meta.nombres || '',
+      apellidos: meta.apellidos || ''
+    };
+  }
+
+  async getCurrentDoctor(): Promise<{ email: string; nombres: string; apellidos: string } | null> {
+    const { data: { session }, error } = await this.supabase.auth.getSession();
+    if (error || !session || !session.user) return null;
+
+    const meta = session.user.user_metadata || {};
+    return {
+      email: session.user.email || '',
+      nombres: meta.nombres || '',
+      apellidos: meta.apellidos || ''
+    };
+  }
+
+  async signOutDoctor(): Promise<void> {
+    const { error } = await this.supabase.auth.signOut();
+    if (error) throw error;
+  }
 }

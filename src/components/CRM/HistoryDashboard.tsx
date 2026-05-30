@@ -445,6 +445,7 @@ export const HistoryDashboard: React.FC = () => {
                   <span><strong>Celular:</strong> {selectedPatient.celular}</span>
                   <span><strong>Fecha Nacimiento:</strong> {new Date(selectedPatient.fecha_nacimiento).toLocaleDateString('es-CO')}</span>
                   <span><strong>EPS Afiliación:</strong> {selectedPatient.eps_nombre || 'Particular (Sin Convenio)'}</span>
+                  {selectedPatient.email && <span style={{ gridColumn: 'span 2' }}><strong>Correo Electrónico:</strong> {selectedPatient.email}</span>}
                 </div>
               </div>
 

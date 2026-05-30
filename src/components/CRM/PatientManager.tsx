@@ -16,6 +16,7 @@ export const PatientManager: React.FC = () => {
   const [apellidos, setApellidos] = useState<string>('');
   const [documento, setDocumento] = useState<string>('');
   const [celular, setCelular] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
   const [fechaNacimiento, setFechaNacimiento] = useState<string>('');
   const [epsId, setEpsId] = useState<string>('');
 
@@ -43,7 +44,7 @@ export const PatientManager: React.FC = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombres.trim() || !apellidos.trim() || !documento.trim() || !celular.trim() || !fechaNacimiento) {
+    if (!nombres.trim() || !apellidos.trim() || !documento.trim() || !celular.trim() || !fechaNacimiento || !email.trim()) {
       setError('Por favor, completa todos los campos del formulario.');
       return;
     }
@@ -59,6 +60,7 @@ export const PatientManager: React.FC = () => {
         documento: documento.trim(),
         celular: celular.trim(),
         fecha_nacimiento: fechaNacimiento,
+        email: email.trim().toLowerCase(),
         eps_id: epsId || undefined
       });
 
@@ -70,6 +72,7 @@ export const PatientManager: React.FC = () => {
       setApellidos('');
       setDocumento('');
       setCelular('');
+      setEmail('');
       setFechaNacimiento('');
       setEpsId('');
     } catch (err: any) {
@@ -157,6 +160,18 @@ export const PatientManager: React.FC = () => {
           </div>
 
           <div className="form-group">
+            <label className="form-label">Correo Electrónico:</label>
+            <input 
+              type="email" 
+              className="form-input" 
+              placeholder="Ej. paciente@correo.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
             <label className="form-label">Fecha de Nacimiento:</label>
             <input 
               type="date" 
@@ -234,7 +249,10 @@ export const PatientManager: React.FC = () => {
                           {p.apellidos}, {p.nombres}
                         </td>
                         <td style={{ padding: '0.75rem', color: 'hsl(var(--text-secondary))' }}>{p.documento}</td>
-                        <td style={{ padding: '0.75rem', color: 'hsl(var(--text-secondary))' }}>{p.celular}</td>
+                        <td style={{ padding: '0.75rem', color: 'hsl(var(--text-secondary))', lineHeight: '1.3' }}>
+                          <div>{p.celular}</div>
+                          {p.email && <div style={{ fontSize: '0.75rem', color: 'hsl(var(--text-muted))', marginTop: '1px' }}>{p.email}</div>}
+                        </td>
                         <td style={{ padding: '0.75rem 0 0.75rem 0.75rem' }}>
                           {p.eps_nombre ? (
                             <span style={{ fontWeight: 600, color: 'hsl(var(--color-primary))', background: 'rgba(220, 80, 110, 0.06)', padding: '2px 6px', borderRadius: 'var(--radius-sm)' }}>

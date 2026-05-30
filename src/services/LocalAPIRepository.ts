@@ -92,4 +92,36 @@ export class LocalAPIRepository implements DermatologyRepository {
       body: JSON.stringify(consultation)
     });
   }
+
+  // --- Autenticación de Médicos ---
+  async signUpDoctor(nombres: string, apellidos: string, email: string, password: string): Promise<void> {
+    await this.request<any>('/medicos/signup', {
+      method: 'POST',
+      body: JSON.stringify({ nombres, apellidos, email, password })
+    });
+  }
+
+  async signInDoctor(email: string, password: string): Promise<{ email: string; nombres: string; apellidos: string }> {
+    const doctor = await this.request<{ email: string; nombres: string; apellidos: string }>('/medicos/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+    localStorage.setItem('catapp_doctor_session', JSON.stringify(doctor));
+    return doctor;
+  }
+
+  async getCurrentDoctor(): Promise<{ email: string; nombres: string; apellidos: string } | null> {
+    const session = localStorage.getItem('catapp_doctor_session');
+    if (!session) return null;
+    try {
+      return JSON.parse(session);
+    } catch (e) {
+      localStorage.removeItem('catapp_doctor_session');
+      return null;
+    }
+  }
+
+  async signOutDoctor(): Promise<void> {
+    localStorage.removeItem('catapp_doctor_session');
+  }
 }
